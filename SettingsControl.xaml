@@ -71,7 +71,7 @@
                         <TextBlock x:Name="prev_screen_button_text" Text="...Bind..." TextAlignment="Center" HorizontalAlignment="Center" Height="24"   Width="180" Grid.Row="6" Grid.Column="1" />
                     </Button>
 
-                    <TextBlock HorizontalAlignment="Left" Height="15" Margin="0,2,0,2" TextWrapping="Wrap" Text="After bind next key Refresh" Width="153" Grid.Row="7" ToolTip="Bind PIT STOP EVERLAY DECREMET KEY"/>
+                    <TextBlock HorizontalAlignment="Left" Height="15" Margin="0,2,0,2" TextWrapping="Wrap" Text="After bind next key Refresh" Width="153" Grid.Row="7" ToolTip="After bind next key Refresh"/>
                     <Button x:Name="refresh_button" HorizontalAlignment="Center" Height="15" Margin="0,2,0,2"  Width="180" Grid.Row="7" Grid.Column="1" ToolTip="Bind PIT STOP EVERLAY UP KEY" Click="refresh_button_Click" >
                         <TextBlock x:Name="refresh_button_text" Text="Refresh" TextAlignment="Center" HorizontalAlignment="Center" Height="24"   Width="180" Grid.Row="7" Grid.Column="1" />
                     </Button>
