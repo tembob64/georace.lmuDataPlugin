@@ -1,0 +1,108 @@
+﻿<UserControl
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:local="clr-namespace:Georace.lmuDataPlugin"
+    xmlns:styles="clr-namespace:SimHub.Plugins.Styles;assembly=SimHub.Plugins" xmlns:Custom="http://metro.mahapps.com/winfx/xaml/controls" x:Class="Georace.lmuDataPlugin.SettingsControl"
+    mc:Ignorable="d" 
+    Loaded="OnLoad"
+    d:DesignHeight="650" d:DesignWidth="400">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="13*"/>
+            <RowDefinition Height="87*"/>
+        </Grid.RowDefinitions>
+        <styles:SHSection x:Name="SHSectionPluginOptions" Title="Plugin Options" Grid.RowSpan="2" IsVisibleChanged="SHSection_IsVisibleChanged">
+            <StackPanel >
+               <Grid Height="600" Width="370">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="30"/>
+
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock HorizontalAlignment="Left" Height="15" Margin="0,2,0,2" TextWrapping="Wrap" Text="Update data thread time out:" Width="153" Grid.Row="1" ToolTip="Update data thread timeout in millisecond. for 50FPS set 20 (1000/20=50 )"/>
+                    <Custom:NumericUpDown x:Name="DataUpdateThreadTimeout" ValueChanged="DataUpdateThreadTimeout_ValueChanged"  Margin="0,2,0,2" Width="180" Grid.Row="1" Grid.Column="1" ToolTip="Update data thread timeout in millisecond. for 50FPS set 20 (1000/20=50 )"  Minimum="1" Maximum="2000"/>
+
+                    <TextBlock HorizontalAlignment="Left" Height="15" Margin="0,2,0,2" TextWrapping="Wrap" Text="Get memory data thread timeout:" Width="153" Grid.Row="2" ToolTip="Get memory data thread timeout in millisecond. for 20FPS set 50 (1000/50=20 )"/>
+                    <Custom:NumericUpDown x:Name="GetMemoryDataThreadTimeout" ValueChanged="GetMemoryDataThreadTimeout_ValueChanged"  Margin="0,2,0,2" Width="180" Grid.Row="2" Grid.Column="1" ToolTip="Get memory data thread timeout in millisecond. for 20FPS set 50 (1000/50=20 )"  Minimum="1" Maximum="2000"/>
+
+                    <TextBlock HorizontalAlignment="Left" Height="15" Margin="0,2,0,2" TextWrapping="Wrap" Text="Antiflick pitMenu timeout:" Width="153" Grid.Row="3" ToolTip="Timeout between requests for different data (data is collected from different GET requests, this is the timeout between them within one data processing cycle) P.S. This timeout affects DataUpdateThreadTimeout."/>
+                    <Custom:NumericUpDown x:Name="AntiFlickPitMenuTimeout" ValueChanged="AntiFlickPitMenuTimeout_ValueChanged"  Margin="0,2,0,2" Width="180" Grid.Row="3" Grid.Column="1" ToolTip=""  Minimum="1" Maximum="2000"/>
+
+
+                   <!--bindings-->
+                    <TextBlock HorizontalAlignment="Left" Height="15" Margin="0,2,0,2" TextWrapping="Wrap" Text="Bind UP key" Width="153" Grid.Row="4" ToolTip="Bind PIT STOP EVERLAY UP KEY"/>
+                    <Button x:Name="Up_button" HorizontalAlignment="Center" Height="15" Margin="0,2,0,2"  Width="180" Grid.Row="4" Grid.Column="1" ToolTip="Bind PIT STOP EVERLAY UP KEY" Click="Up_button_Click">
+                        <TextBlock x:Name="Up_button_text" Text="...Bind..." TextAlignment="Center" HorizontalAlignment="Center" Height="20"   Width="180" Grid.Row="4" Grid.Column="1" />
+                    </Button>
+                    <TextBlock HorizontalAlignment="Left" Height="15" Margin="0,2,0,2" TextWrapping="Wrap" Text="Bind DOWN key" Width="153" Grid.Row="5" ToolTip="Bind PIT STOP EVERLAY DOWN KEY"/>
+                    <Button x:Name="Down_button" HorizontalAlignment="Center" Height="15" Margin="0,2,0,2"  Width="180" Grid.Row="5" Grid.Column="1" ToolTip="Bind PIT STOP EVERLAY UP KEY" Click="Down_button_Click">
+                        <TextBlock x:Name="Down_button_text" Text="...Bind..." TextAlignment="Center" HorizontalAlignment="Center" Height="20"   Width="180" Grid.Row="5" Grid.Column="1" />
+                    </Button>
+                    <TextBlock HorizontalAlignment="Left" Height="15" Margin="0,2,0,2" TextWrapping="Wrap" Text="Bind Increment key" Width="153" Grid.Row="6" ToolTip="Bind PIT STOP EVERLAY INCREMENT KEY"/>
+                    <Button x:Name="Right_button" HorizontalAlignment="Center" Height="15" Margin="0,2,0,2"  Width="180" Grid.Row="6" Grid.Column="1" ToolTip="Bind PIT STOP EVERLAY UP KEY" Click="Right_button_Click">
+                        <TextBlock x:Name="Right_button_text" Text="...Bind..." TextAlignment="Center" HorizontalAlignment="Center" Height="20"  Width="180" Grid.Row="6" Grid.Column="1"/>
+                    </Button>
+                    <TextBlock HorizontalAlignment="Left" Height="15" Margin="0,2,0,2" TextWrapping="Wrap" Text="Bind Decremet key" Width="153" Grid.Row="7" ToolTip="Bind PIT STOP EVERLAY DECREMET KEY"/>
+                    <Button x:Name="Left_button" HorizontalAlignment="Center" Height="15" Margin="0,2,0,2"  Width="180" Grid.Row="7" Grid.Column="1" ToolTip="Bind PIT STOP EVERLAY UP KEY" Click="Left_button_Click" >
+                        <TextBlock x:Name="Left_button_text" Text="...Bind..." TextAlignment="Center" HorizontalAlignment="Center" Height="24"   Width="180" Grid.Row="7" Grid.Column="1" />
+                    </Button>
+
+                    <TextBlock HorizontalAlignment="Left" Height="15" Margin="0,7,0,8" TextWrapping="Wrap" Text="Use long press for screens" Width="175" Grid.Row="8"/>
+                    <CheckBox x:Name="useLogPress" HorizontalAlignment="Center" Height="15" Margin="0,2,0,2"  Width="180" Grid.Row="8" Grid.Column="1" ToolTip="Use long press  buttons  for tab control (Increment and Decrement buttons long press changes Screens)" Checked="useLogPress_Checked" Unchecked="useLogPress_unChecked"/>
+
+                    <TextBlock HorizontalAlignment="Left" Height="15" Margin="0,2,0,2" TextWrapping="Wrap" Text="Bind Next Screen" Width="153" Grid.Row="9" ToolTip="Bind Next Screen"/>
+                    <Button x:Name="next_screen" HorizontalAlignment="Center" Height="15" Margin="0,2,0,2"  Width="180" Grid.Row="9" Grid.Column="1" ToolTip="Bind Next Screen" Click="next_screen_Click" >
+                        <TextBlock x:Name="next_screen_button_text" Text="...Bind..." TextAlignment="Center" HorizontalAlignment="Center" Height="24"   Width="180" Grid.Row="9" Grid.Column="1" />
+                    </Button>
+
+                    <TextBlock HorizontalAlignment="Left" Height="15" Margin="0,2,0,2" TextWrapping="Wrap" Text="Bind Previous screen" Width="153" Grid.Row="10" ToolTip="Bind Previous screen"/>
+                    <Button x:Name="prev_screen" HorizontalAlignment="Center" Height="15" Margin="0,2,0,2"  Width="180" Grid.Row="10" Grid.Column="1" ToolTip="Bind Previous screen" Click="prev_screen_Click" >
+                        <TextBlock x:Name="prev_screen_button_text" Text="...Bind..." TextAlignment="Center" HorizontalAlignment="Center" Height="24"   Width="180" Grid.Row="10" Grid.Column="1" />
+                    </Button>
+                   
+                   <!--bindings end-->
+
+                    <TextBlock HorizontalAlignment="Left" Height="15" Margin="0,2,0,2" TextWrapping="Wrap" Text="After bind next key Refresh" Width="153" Grid.Row="11" ToolTip="Bind PIT STOP EVERLAY DECREMET KEY"/>
+                    <Button x:Name="refresh_button" HorizontalAlignment="Center" Height="15" Margin="0,2,0,2"  Width="180" Grid.Row="11" Grid.Column="1" ToolTip="Bind PIT STOP EVERLAY UP KEY" Click="refresh_button_Click" >
+                        <TextBlock x:Name="refresh_button_text" Text="Refresh" TextAlignment="Center" HorizontalAlignment="Center" Height="24"   Width="180" Grid.Row="11" Grid.Column="1" />
+                    </Button>
+
+                    <TextBlock HorizontalAlignment="Left" Height="15" Margin="0,7,0,8" TextWrapping="Wrap" Text="Real time clock in session tab" Width="175" Grid.Row="12"/>
+                    <CheckBox x:Name="RealTimeClock" HorizontalAlignment="Center" Height="15" Margin="0,2,0,2"  Width="180" Grid.Row="12" Grid.Column="1" ToolTip="Real time clock in session tab" Checked="RealTimeClock_Checked" Unchecked="RealTimeClock_unChecked"/>
+
+                    <TextBlock HorizontalAlignment="Left" Height="15" Margin="0,7,0,8" TextWrapping="Wrap" Text="24 hour clock format" Width="175" Grid.Row="13"/>
+                    <CheckBox x:Name="clock_format24" HorizontalAlignment="Center" Height="15" Margin="0,2,0,2"  Width="180" Grid.Row="13" Grid.Column="1" ToolTip="24 hour clock format in Session tab" Checked="clock_format24_Checked" Unchecked="clock_format24_unChecked"/>
+
+                    <TextBlock x:Name="message_text" Margin="0,0,0,0" TextWrapping="Wrap" Text="" Grid.Row="14" Grid.RowSpan="2"  Grid.Column="0" Grid.ColumnSpan="2"  VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" FontSize="14" FontWeight="Bold" Foreground="#FFF70808"/>
+                </Grid>
+                <TextBlock TextWrapping="Wrap" Text="Plugin Description" FontWeight="Bold" Margin="0,0,0,5"/>
+                <TextBlock TextWrapping="Wrap" Text="This plugin"/>
+                <TextBlock TextWrapping="Wrap" Text="Plugin Version 1.4.5" FontWeight="Bold" Margin="0,10,0,0"/>
+
+
+            </StackPanel>
+        </styles:SHSection>
+
+    </Grid>
+</UserControl>
