@@ -99,6 +99,7 @@ namespace Georace.lmuDataPlugin
         private bool NeedUpdateData = false;
         private bool GetDataThreadEndWork = false;
         JObject pitMenuJSONData;
+       // JObject RepairAndRefuelJSONdata
 
         MappedBuffer<LMU_Extended> extendedBuffer = new MappedBuffer<LMU_Extended>(LMU_Constants.MM_EXTENDED_FILE_NAME, false /*partial*/, true /*skipUnchanged*/);
         MappedBuffer<rF2Scoring> scoringBuffer = new MappedBuffer<rF2Scoring>(LMU_Constants.MM_SCORING_FILE_NAME, true /*partial*/, true /*skipUnchanged*/);
@@ -1383,14 +1384,14 @@ namespace Georace.lmuDataPlugin
 
         private async void IncrementParameterValue()
         {
-            pitStopUpdatePause = 3000;
+            pitStopUpdatePause = 1000;
             if (GameRunning && !GameInMenu && !GamePaused && LMU_MenuPositions.ScreenIndex == ScreenIndexMax)
             {
                 try
                 {
-                    JObject RepairAndRefuelJSONdata = JObject.Parse(await FetchRepairAndRefuelJSONdata());
+                   // JObject RepairAndRefuelJSONdata = JObject.Parse(await FetchRepairAndRefuelJSONdata());
                     // await Task.Delay(ButtonBindSettings.AntiFlickPitMenuTimeout, ctsGetJSonDataThread.Token);
-                    JObject pitMenuJSONData = JObject.Parse(RepairAndRefuelJSONdata["pitMenu"].ToString());
+                    //pitMenuJSONData = JObject.Parse(RepairAndRefuelJSONdata["pitMenu"].ToString());
                     //}
                     int CurrentSetting = (int)pitMenuJSONData["pitMenu"][PitStopDataIndexes[LMU_MenuPositions.selectedMenuIndex].index]["currentSetting"];
                     if (CurrentSetting < PitStopDataIndexes[LMU_MenuPositions.selectedMenuIndex].maxvalue)
@@ -1413,15 +1414,15 @@ namespace Georace.lmuDataPlugin
 
         private async void DecrementParameterValue()
         {
-            pitStopUpdatePause = 3000;
+            pitStopUpdatePause = 1000;
             if (GameRunning && !GameInMenu && !GamePaused && LMU_MenuPositions.ScreenIndex == ScreenIndexMax)
             {
 
                 try
                 {
-                    JObject RepairAndRefuelJSONdata = JObject.Parse(await FetchRepairAndRefuelJSONdata());
+                    //JObject RepairAndRefuelJSONdata = JObject.Parse(await FetchRepairAndRefuelJSONdata());
                    // await Task.Delay(ButtonBindSettings.AntiFlickPitMenuTimeout, ctsGetJSonDataThread.Token);
-                    JObject pitMenuJSONData = JObject.Parse(RepairAndRefuelJSONdata["pitMenu"].ToString());
+                    //pitMenuJSONData = JObject.Parse(RepairAndRefuelJSONdata["pitMenu"].ToString());
            
 
                     int CurrentSetting = (int)pitMenuJSONData["pitMenu"][PitStopDataIndexes[LMU_MenuPositions.selectedMenuIndex].index]["currentSetting"];
@@ -1555,6 +1556,37 @@ namespace Georace.lmuDataPlugin
                 return string.Empty; // Return an empty string in case of an error
             }
         }
+
+        private async Task<string> FetchProfileJSONdata()
+        {
+            try
+            {
+                var urlProfile = "http://localhost:6397/rest/profile";
+                var responseProfile = await _httpClient.GetStringAsync(urlProfile);
+                return responseProfile;
+            }
+            catch (Exception ex)
+            {
+                SimHub.Logging.Current.Error($"Failed to fetch urlProfile data: {ex.Message}");
+                return string.Empty; // Return an empty string in case of an error
+            }
+        }
+
+        private async Task<string> FetchStrategyUsageJSONdata()
+        {
+            try
+            {
+                var urlStrategyUsage = "http://localhost:6397/rest/strategy/usage";
+                var responseStrategyUsage = await _httpClient.GetStringAsync(urlStrategyUsage);
+                return responseStrategyUsage;
+            }
+            catch (Exception ex)
+            {
+                SimHub.Logging.Current.Error($"Failed to fetch urlProfile data: {ex.Message}");
+                return string.Empty; // Return an empty string in case of an error
+            }
+        }
+
         private float GetPMCValue(JArray pitMenuJSONData, int pmcValue)
         {
             JToken item = pitMenuJSONData?.FirstOrDefault(x => (int?)x["PMC Value"] == pmcValue);
