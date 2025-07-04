@@ -73,10 +73,13 @@ namespace Georace.lmuDataPlugin
         private List<float> EnergyConsuptions = new List<float>();
         private List<float> ClearEnergyConsuptions = new List<float>();
         private List<float> FuelConsuptions = new List<float>();
+        private List<float> ClearFuelConsuptions = new List<float>();
 
         //private double energy_AverageConsumptionPer5Lap;
         //private int energy_LastLapEnergy = 0;
-        private int energy_CurrentIndex = 0;
+        private int EnergyCurrentIndex = 1;
+        private int ClearEnergyCurrentIndex = -1;
+        private int hystory_size = 5;
         //private int IsInPit = -1;
         //private Guid LastLapId = new Guid();
 
@@ -88,10 +91,10 @@ namespace Georace.lmuDataPlugin
         private bool IsLapValid = true;
         private bool LapInvalidated = false;
         private int pitStopUpdatePause = -1;
-        private double sesstionTimeStamp = 0;
-        private double lastLapTime = 0;
+        private float sesstionTimeStamp = 0;
+        private float lastLapTime = 0;
         private const int updateDataDelayTimer = 10;
-        private int updateDataDelayCounter = 0;
+        //private int updateDataDelayCounter = 0;
         private int updateConsuptionDelayCounter = 0;
         private bool updateConsuptionFlag = false;
         //private bool TireManagementJSONdataInited = false;
@@ -183,7 +186,7 @@ namespace Georace.lmuDataPlugin
                     {
                         SessionId = data.SessionId;
                         lastLapTime = 0;
-                        sesstionTimeStamp = data.OldData.SessionTimeLeft.TotalSeconds;
+                        sesstionTimeStamp = (float)data.OldData.SessionTimeLeft.TotalSeconds;
                         LMURepairAndRefuelData.energyPerLastLap = 0;
                         LMURepairAndRefuelData.energyPerLast5Lap = 0;
                         LMURepairAndRefuelData.energyPerLast5ClearLap = 0;
@@ -197,8 +200,8 @@ namespace Georace.lmuDataPlugin
                     if (data.OldData.CurrentLap < data.NewData.CurrentLap || (LMURepairAndRefuelData.energyPerLastLap == 0 && !updateConsuptionFlag))
                     {
                         // Calculate last lap time
-                        lastLapTime = sesstionTimeStamp - data.OldData.SessionTimeLeft.TotalSeconds;
-                        sesstionTimeStamp = data.OldData.SessionTimeLeft.TotalSeconds;
+                        lastLapTime = sesstionTimeStamp - (float)data.OldData.SessionTimeLeft.TotalSeconds;
+                        sesstionTimeStamp = (float)data.OldData.SessionTimeLeft.TotalSeconds;
                         // Calculate last lap time end
 
                         updateConsuptionFlag = true;
@@ -223,6 +226,11 @@ namespace Georace.lmuDataPlugin
                             pluginManager.SetPropertyValue("Georace.lmu.energyPerLast5Lap", this.GetType(), LMURepairAndRefuelData.energyPerLast5Lap);
                             pluginManager.SetPropertyValue("Georace.lmu.energyPerLast5ClearLap", this.GetType(), LMURepairAndRefuelData.energyPerLast5ClearLap);
                             pluginManager.SetPropertyValue("Georace.lmu.energyPerLastLap", this.GetType(), LMURepairAndRefuelData.energyPerLastLap);
+
+                            pluginManager.SetPropertyValue("Georace.lmu.fuelPerLast5Lap", this.GetType(), LMURepairAndRefuelData.fuelPerLast5Lap);
+                            pluginManager.SetPropertyValue("Georace.lmu.fuelPerLast5ClearLap", this.GetType(), LMURepairAndRefuelData.fuelPerLast5ClearLap);
+                            pluginManager.SetPropertyValue("Georace.lmu.fuelPerLastLap", this.GetType(), LMURepairAndRefuelData.fuelPerLastLap);
+
                             pluginManager.SetPropertyValue("Georace.lmu.energyTimeElapsed", this.GetType(), LMURepairAndRefuelData.energyTimeElapsed);
 
                             pluginManager.SetPropertyValue("Georace.lmu.passStopAndGo", this.GetType(), LMURepairAndRefuelData.passStopAndGo);
@@ -434,6 +442,21 @@ namespace Georace.lmuDataPlugin
             settings = JsonExtensions.FromJsonFileWithVersionning<JoystickPluginSettings>(commonStoragePath, 5, (JsonSerializerSettings)null) ?? new JoystickPluginSettings();
         }
 
+
+        private void AddOrUpdateCircularList<T>(List<T> list, ref int index, T value)
+        {
+            if (list.Count < hystory_size)
+            {
+                list.Add(value);
+                index = list.Count - 1;
+            }
+            else
+            {
+                index = (index + 1) % hystory_size;
+                list[index] = value;
+            }
+        }
+
         private async void lmu_CalculateConsumptionsThread()
 
         {
@@ -469,46 +492,68 @@ namespace Georace.lmuDataPlugin
                                 //FuelConsuptions.Clear();
                                 //LapTimes.Clear();
                                 LMURepairAndRefuelData.energyPerLastLap = virtualEnergyConsumption;
+                                LMURepairAndRefuelData.fuelPerLastLap = fuelConsumption;
 
-                                if (EnergyConsuptions.Count < 5)
-                                {
-                                    energy_CurrentIndex++;
-                                    EnergyConsuptions.Add(virtualEnergyConsumption);
-                                }
-                                else if (EnergyConsuptions.Count == 5)
-                                {
-                                    energy_CurrentIndex++;
-                                    if (energy_CurrentIndex > 4) energy_CurrentIndex = 0;
-                                    EnergyConsuptions[energy_CurrentIndex] = virtualEnergyConsumption;
-                                }
+                                AddOrUpdateCircularList(EnergyConsuptions, ref EnergyCurrentIndex, virtualEnergyConsumption);
+                                AddOrUpdateCircularList(FuelConsuptions, ref EnergyCurrentIndex, fuelConsumption);
+          
+                                //if (EnergyConsuptions.Count < 5)
+                                //{
+                                //    energy_CurrentIndex++;
+                                //    EnergyConsuptions.Add(virtualEnergyConsumption);
+                                //}
+                                //else if (EnergyConsuptions.Count == 5)
+                                //{
+                                //    energy_CurrentIndex++;
+                                //    if (energy_CurrentIndex > 4) energy_CurrentIndex = 0;
+                                //    EnergyConsuptions[energy_CurrentIndex] = virtualEnergyConsumption;
+                                //}
 
                                 if (IsLapValid && !LapInvalidated && !OutFromPitFlag && !InToPitFlag && LMURepairAndRefuelData.IsInPit == 0)
                                 {
-                                    if (LapTimes.Count < 5)
-                                    {
-                                        energy_CurrentIndex++;
-                                        ClearEnergyConsuptions.Add(virtualEnergyConsumption);
-                                        FuelConsuptions.Add(fuelConsumption);
-                                        LapTimes.Add((float)lastLapTime);
+                                    AddOrUpdateCircularList(LapTimes, ref ClearEnergyCurrentIndex, lastLapTime);
+                                    AddOrUpdateCircularList(ClearEnergyConsuptions,ref ClearEnergyCurrentIndex,virtualEnergyConsumption);
+                                    AddOrUpdateCircularList(ClearFuelConsuptions, ref ClearEnergyCurrentIndex,fuelConsumption);
 
-                                    }
-                                    else if (LapTimes.Count == 5)
-                                    {
-                                        energy_CurrentIndex++;
-                                        if (energy_CurrentIndex > 4) energy_CurrentIndex = 0;
-                                        LapTimes[energy_CurrentIndex] = (float)lastLapTime;
-                                        ClearEnergyConsuptions[energy_CurrentIndex] = virtualEnergyConsumption;
-                                        FuelConsuptions[energy_CurrentIndex] = fuelConsumption;
-                                    }
+                                   
+
+
+                                    //if (LapTimes.Count < 5)
+                                    //{
+                                    //    energy_CurrentIndex++;
+                                    //    ClearEnergyConsuptions.Add(virtualEnergyConsumption);
+                                    //    FuelConsuptions.Add(fuelConsumption);
+                                    //    LapTimes.Add((float)lastLapTime);
+
+                                    //}
+                                    //else if (LapTimes.Count == 5)
+                                    //{
+                                    //    energy_CurrentIndex++;
+                                    //    if (energy_CurrentIndex > 4) energy_CurrentIndex = 0;
+                                    //    LapTimes[energy_CurrentIndex] = (float)lastLapTime;
+                                    //    ClearEnergyConsuptions[energy_CurrentIndex] = virtualEnergyConsumption;
+                                    //    FuelConsuptions[energy_CurrentIndex] = fuelConsumption;
+                                    //}
                                 }
                                 // Logging.Current.Info("Last Lap: " + lastLapTime.ToString() + " virtualEnergyConsumption: " + virtualEnergyConsumption.ToString() + " Raw: " + (expectedUsage["virtualEnergyConsumption"] != null ? (float)(double)expectedUsage["virtualEnergyConsumption"] : 0).ToString());
                                 if (EnergyConsuptions.Count() > 0)
                                 {
                                     LMURepairAndRefuelData.energyPerLast5Lap = (float)EnergyConsuptions.Average();
+                                    LMURepairAndRefuelData.fuelPerLast5Lap = (float)FuelConsuptions.Average();
                                 }
                                 else
                                 {
                                     LMURepairAndRefuelData.energyPerLast5Lap = 0;
+                                }
+
+                                if (ClearEnergyConsuptions.Count() > 0)
+                                {
+                                    LMURepairAndRefuelData.energyPerLast5ClearLap = (float)ClearEnergyConsuptions.Average();
+                                    LMURepairAndRefuelData.fuelPerLast5ClearLap = (float)ClearFuelConsuptions.Average();
+                                }
+                                else
+                                {
+                                    LMURepairAndRefuelData.energyPerLast5ClearLap = 0;
                                 }
 
                                 updateConsuptionFlag = false;
@@ -1382,7 +1427,7 @@ namespace Georace.lmuDataPlugin
             SaveJSonSetting();
         }
 
-        private async void IncrementParameterValue()
+        private  void IncrementParameterValue()
         {
             pitStopUpdatePause = 1000;
             if (GameRunning && !GameInMenu && !GamePaused && LMU_MenuPositions.ScreenIndex == ScreenIndexMax)
@@ -1412,7 +1457,7 @@ namespace Georace.lmuDataPlugin
             }
         }
 
-        private async void DecrementParameterValue()
+        private  void DecrementParameterValue()
         {
             pitStopUpdatePause = 1000;
             if (GameRunning && !GameInMenu && !GamePaused && LMU_MenuPositions.ScreenIndex == ScreenIndexMax)
@@ -1806,6 +1851,10 @@ namespace Georace.lmuDataPlugin
             pluginManager.AddProperty("Georace.lmu.energyPerLast5Lap", this.GetType(), LMURepairAndRefuelData.energyPerLast5Lap);
             pluginManager.AddProperty("Georace.lmu.energyPerLast5ClearLap", this.GetType(), LMURepairAndRefuelData.energyPerLast5ClearLap);
             pluginManager.AddProperty("Georace.lmu.energyPerLastLap", this.GetType(), LMURepairAndRefuelData.energyPerLastLap);
+            pluginManager.AddProperty("Georace.lmu.fuelPerLast5Lap", this.GetType(), LMURepairAndRefuelData.fuelPerLast5Lap);
+            pluginManager.AddProperty("Georace.lmu.fuelPerLast5ClearLap", this.GetType(), LMURepairAndRefuelData.fuelPerLast5ClearLap);
+            pluginManager.AddProperty("Georace.lmu.fuelPerLastLap", this.GetType(), LMURepairAndRefuelData.fuelPerLastLap);
+
             pluginManager.AddProperty("Georace.lmu.energyPerLastLapRealTime", this.GetType(), 0);
             pluginManager.AddProperty("Georace.lmu.energyLapsRealTimeElapsed", this.GetType(), 0);
 
@@ -2251,8 +2300,11 @@ namespace Georace.lmuDataPlugin
             public static int mPendingPenaltyType3 { get; set; }
             public static float energyTimeElapsed { get; set; }
             public static float energyPerLastLap { get; set; }
-            public static float energyPerLast5Lap { get; set; }
+        public static float fuelPerLastLap { get; set; }
+        public static float energyPerLast5Lap { get; set; }
+            public static float fuelPerLast5Lap { get; set; }
             public static float energyPerLast5ClearLap { get; set; }
+            public static float fuelPerLast5ClearLap { get; set; }
             public static double currentFuel { get; set; }
             public static int currentVirtualEnergy { get; set; }
             public static int currentBattery { get; set; }
